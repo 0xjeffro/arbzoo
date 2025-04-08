@@ -48,14 +48,13 @@ func (store *DataStore) Insert(data PriceData) {
 }
 
 func (store *DataStore) StartAutoCleanup() {
-	store.cleanupTicker = time.NewTicker(5 * time.Second) // 每5秒清理一次
+	store.cleanupTicker = time.NewTicker(5 * time.Second) // Cleanup interval
 	go func() {
 		for range store.cleanupTicker.C {
 			now := time.Now().Unix()
 			store.mu.RLock()
 			for _, bucket := range store.buckets {
 				bucket.mu.Lock()
-				// 只保留最近 retentionSec 秒内的数据
 				filtered := bucket.Prices[:0]
 				for _, p := range bucket.Prices {
 					if now-p.ReceivedAt <= store.retentionSec {
